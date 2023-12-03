@@ -1,0 +1,8 @@
+---
+keys:
+  - &admin age1d6u9ve8q2t5kjtl75gd2dkw3yknryuqclvlr9x0rf27xuqercu7sml87yj
+creation_rules:
+  - path_regex: .*
+    key_groups:
+      - age:
+        - *admin
