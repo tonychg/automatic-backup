@@ -4,7 +4,7 @@ version: "3"
 vars:
   SECRETS_ENCRYPTED_PATH: encrypted/secrets.tar.gz.enc
   SECRETS_PATHS: |
-    {{.ROOT_DIR}}/secrets \
+    ./secrets \
 
 env:
   SOPS_AGE_KEY_FILE:
@@ -17,14 +17,14 @@ tasks:
     cmds:
       - |
         tar -cvzf - \
-          --absolute-names {{.SECRETS_PATHS}} \
+          {{.SECRETS_PATHS}} \
           | sops --encrypt /dev/stdin > {{.SECRETS_ENCRYPTED_PATH}}
   decrypt:
     desc: Decrypt secrets
     silent: true
     cmds:
       - |
-        sops --decrypt {{.SECRETS_ENCRYPTED_PATH}} | tar -C / -xzvf -
+        sops --decrypt {{.SECRETS_ENCRYPTED_PATH}} | tar -C . -xzvf -
   backup:
     cmds:
       - echo "Hello, world!"
