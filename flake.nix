@@ -23,10 +23,6 @@
             sops
             age
           ];
-
-          shellHook = ''
-            task -l
-          '';
         };
       });
 }
