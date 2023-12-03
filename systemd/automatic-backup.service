@@ -1,0 +1,7 @@
+[Unit]
+Description=Automatic Backup Service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/%u/ghq/github.com/tonychg/automatic-backup
+ExecStart=bash -lc "direnv exec . task backup"

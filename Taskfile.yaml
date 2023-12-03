@@ -2,6 +2,8 @@
 version: "3"
 
 vars:
+  RESTIC_MOUNT_PATH: ./mounted
+  RESTIC_IGNORE_PATH: ./secrets/.resticignore
   SECRETS_ENCRYPTED_PATH: encrypted/secrets.tar.gz.enc
   SECRETS_PATHS: |
     ./secrets \
@@ -9,6 +11,9 @@ vars:
 env:
   SOPS_AGE_KEY_FILE:
     sh: echo $HOME/.config/sops/age/tonychg.txt
+
+dotenv:
+  - ./secrets/.env.local
 
 tasks:
   encrypt:
@@ -25,6 +30,38 @@ tasks:
     cmds:
       - |
         sops --decrypt {{.SECRETS_ENCRYPTED_PATH}} | tar -C . -xzvf -
+  install:
+    desc: Install Automatic Backup
+    cmds:
+      - |
+        cp ./systemd/automatic-backup.service $HOME/.config/systemd/user/
+        cp ./systemd/automatic-backup.timer $HOME/.config/systemd/user/
+        systemctl --user daemon-reload
+        systemctl enable --user automatic-backup.timer
+        systemctl start --user automatic-backup.timer
+        systemctl status --user automatic-backup.timer
+  restic:
+    cmds:
+      - |
+        restic {{.RESTIC_ARGS | default .CLI_ARGS}}
+  snapshots:
+    cmds:
+      - task: restic
+        vars:
+          RESTIC_ARGS: snapshots
+  mount:
+    cmds:
+      - mkdir -p {{.RESTIC_MOUNT_PATH}}
+      - task: restic
+        vars:
+          RESTIC_ARGS: mount {{.RESTIC_MOUNT_PATH}}
   backup:
     cmds:
-      - echo "Hello, world!"
+      - task: restic
+        vars:
+          RESTIC_ARGS: backup --verbose --json --exclude-file "{{.RESTIC_IGNORE_PATH}}" --tag "$(hostname)" "${HOME}"
+  prune:
+    cmds:
+      - task: restic
+        vars:
+          RESTIC_ARGS: prune
