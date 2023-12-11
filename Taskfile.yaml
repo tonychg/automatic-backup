@@ -59,7 +59,7 @@ tasks:
     cmds:
       - task: restic
         vars:
-          RESTIC_ARGS: backup --quiet --json --exclude-file "{{.RESTIC_IGNORE_PATH}}" --tag "$(hostname)" "${HOME}"
+          RESTIC_ARGS: backup --quiet --json --exclude-file "{{.RESTIC_IGNORE_PATH}}" --tag "$(hostname)-auto" "${HOME}"
   prune:
     cmds:
       - task: restic
