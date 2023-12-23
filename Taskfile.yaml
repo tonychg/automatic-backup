@@ -1,20 +1,15 @@
----
 version: "3"
-
 vars:
-  RESTIC_MOUNT_PATH: ./mounted
+  RESTIC_MOUNT_PATH: /mnt/tonychg
   RESTIC_IGNORE_PATH: ./secrets/.resticignore
   SECRETS_ENCRYPTED_PATH: encrypted/secrets.tar.gz.enc
   SECRETS_PATHS: |
     ./secrets \
-
 env:
   SOPS_AGE_KEY_FILE:
     sh: echo $HOME/.config/sops/age/tonychg.txt
-
 dotenv:
   - ./secrets/.env.local
-
 tasks:
   encrypt:
     desc: Encrypt secrets
@@ -60,6 +55,11 @@ tasks:
       - task: restic
         vars:
           RESTIC_ARGS: backup --quiet --json --exclude-file "{{.RESTIC_IGNORE_PATH}}" --tag "$(hostname)-auto" "${HOME}"
+  dry-run:
+    cmds:
+      - task: restic
+        vars:
+          RESTIC_ARGS: backup --dry-run --exclude-file "{{.RESTIC_IGNORE_PATH}}" --tag "$(hostname)-auto" "${HOME}"
   prune:
     cmds:
       - task: restic
